@@ -11,10 +11,10 @@ world = World()
 
 # You may uncomment the smaller graphs for development and testing purposes.
 # map_file = "maps/test_line.txt"
-map_file = "maps/test_cross.txt"
+# map_file = "maps/test_cross.txt"
 # map_file = "maps/test_loop.txt"
 # map_file = "maps/test_loop_fork.txt"
-# map_file = "maps/main_maze.txt"
+map_file = "maps/main_maze.txt"
 
 # Loads the map into a dictionary
 room_graph=literal_eval(open(map_file, "r").read())
@@ -28,9 +28,12 @@ player = Player(world.starting_room)
 # Fill this out with directions to walk
 directions = []
 map_dict = {}
-visited = [False] * 9
+number = 500
+visited = [False] * number
+locations = []
 
-for i in range(0, 9):
+# Creating world graph
+for i in range(0, number):
     nsew = world.rooms[i].get_exits()
     map_dict[i] = []
     for j in nsew:
@@ -38,29 +41,35 @@ for i in range(0, 9):
 print(map_dict)
 
 def rec_func(node):
-    print(len(map_dict[node]))
-    print(visited[int(map_dict[node][0].split(" ")[1])])
-    if len(map_dict[node]) == 1 and visited[int(map_dict[node][0].split(" ")[1])] == True:
+    global locations
+    locations += [node]
+    # if len(map_dict[node]) == 0:
+    #     return directions
+    # else:
+    visited[node] = True
+    if node == 26:
+        print(f'this is 26: {map_dict[node]}')
+    for idx, i in enumerate(map_dict[node]):
+        if visited[int(i.split(" ")[1])] == False:
+            directions.append(i.split(" ")[0])
+            if len(map_dict[node]) == 0:
+                return directions
+            map_dict[node].pop(idx)
+            rec_func(int(i.split(" ")[1]))
+    if len(map_dict[node]) == 0:
         return directions
-    else:
-        print(f'node: {node}')
-        print(f'this juan::::: {map_dict[node]}')
-        visited[node] = True
-        for idx, i in enumerate(map_dict[node]):
-            if visited[int(i.split(" ")[1])] == False:
-                directions.append(i.split(" ")[0])
-                if len(map_dict[node]) == 0:
-                    return directions
-                map_dict[node].pop(idx)
-                rec_func(int(i.split(" ")[1]))
-        if len(map_dict[node]) == 0:
-            return directions
-        directions.append(map_dict[node][0].split(" ")[0])
-        x = int(map_dict[node][0].split(" ")[1])
-        map_dict[node].pop(0)
-        rec_func(x)
+    directions.append(map_dict[node][0].split(" ")[0])
+    x = int(map_dict[node][0].split(" ")[1])
+    map_dict[node].pop(0)
+    rec_func(x)
 traversal_path = rec_func(0)
-print(traversal_path)
+print(f'traversal path: {traversal_path}')
+print(len(traversal_path))
+print(map_dict)
+print(visited)
+# for i in range(0, 500):
+#     if i in locations:
+#         print(f'{i} ---- {True}')
 
 
 # traversal_path = ['n', 'n', 's', 's', 'e', 'e', 'w', 'w', 's', 's', 'w', 'w', 'n', 'n', 'e']
@@ -69,19 +78,19 @@ print(traversal_path)
 
 
 # TRAVERSAL TEST
-# visited_rooms = set()
-# player.current_room = world.starting_room
-# visited_rooms.add(player.current_room)
+visited_rooms = set()
+player.current_room = world.starting_room
+visited_rooms.add(player.current_room)
 
-# for move in traversal_path:
-#     player.travel(move)
-#     visited_rooms.add(player.current_room)
+for move in traversal_path:
+    player.travel(move)
+    visited_rooms.add(player.current_room)
 
-# if len(visited_rooms) == len(room_graph):
-#     print(f"TESTS PASSED: {len(traversal_path)} moves, {len(visited_rooms)} rooms visited")
-# else:
-#     print("TESTS FAILED: INCOMPLETE TRAVERSAL")
-#     print(f"{len(room_graph) - len(visited_rooms)} unvisited rooms")
+if len(visited_rooms) == len(room_graph):
+    print(f"TESTS PASSED: {len(traversal_path)} moves, {len(visited_rooms)} rooms visited")
+else:
+    print("TESTS FAILED: INCOMPLETE TRAVERSAL")
+    print(f"{len(room_graph) - len(visited_rooms)} unvisited rooms")
 
 
 
